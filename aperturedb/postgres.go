@@ -9,8 +9,8 @@ import (
 	postgres_migrate "github.com/golang-migrate/migrate/v4/database/postgres"
 	// Import the file source to register it with the migrate library.
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/lightninglabs/aperture/aperturedb/sqlc"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/aperturedb/sqlc"
 )
 
 const (

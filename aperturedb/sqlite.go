@@ -9,8 +9,8 @@ import (
 	"time"
 
 	sqlite_migrate "github.com/golang-migrate/migrate/v4/database/sqlite"
-	"github.com/lightninglabs/aperture/aperturedb/sqlc"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/aperturedb/sqlc"
 	_ "modernc.org/sqlite" // Register relevant drivers.
 )
 

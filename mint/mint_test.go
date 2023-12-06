@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lightninglabs/aperture/lsat"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/lsat"
 	"gopkg.in/macaroon.v2"
 )
 

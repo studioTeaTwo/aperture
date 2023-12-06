@@ -1,6 +1,6 @@
 package main
 
-import "github.com/lightninglabs/aperture"
+import "github.com/studioTeaTwo/aperture"
 
 func main() {
 	aperture.Main()

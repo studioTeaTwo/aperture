@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/lightninglabs/aperture/lsat"
-	"github.com/lightninglabs/aperture/mint"
+	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/mint"
 	"github.com/lightningnetwork/lnd/lnrpc"
 )
 

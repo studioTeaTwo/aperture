@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcd/btcec/v2"
-	"github.com/lightninglabs/aperture/aperturedb/sqlc"
-	"github.com/lightninglabs/aperture/lnc"
 	"github.com/lightningnetwork/lnd/clock"
+	"github.com/studioTeaTwo/aperture/aperturedb/sqlc"
+	"github.com/studioTeaTwo/aperture/lnc"
 )
 
 type (

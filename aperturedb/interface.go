@@ -7,7 +7,7 @@ import (
 	prand "math/rand"
 	"time"
 
-	"github.com/lightninglabs/aperture/aperturedb/sqlc"
+	"github.com/studioTeaTwo/aperture/aperturedb/sqlc"
 )
 
 const (

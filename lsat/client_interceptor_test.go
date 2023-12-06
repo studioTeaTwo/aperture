@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lightninglabs/aperture/internal/test"
 	"github.com/lightninglabs/lndclient"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/internal/test"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 	"gopkg.in/macaroon.v2"

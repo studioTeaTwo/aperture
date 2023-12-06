@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lightninglabs/aperture/mint"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/mint"
 )
 
 var (

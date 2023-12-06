@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/btcsuite/btcd/btcec/v2"
-	"github.com/lightninglabs/aperture/lnc"
 	"github.com/lightninglabs/lightning-node-connect/mailbox"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/lnc"
 )
 
 func newLNCSessionsStoreWithDB(db *BaseDB) *LNCSessionsStore {

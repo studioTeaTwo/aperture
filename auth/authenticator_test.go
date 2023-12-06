@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/lightninglabs/aperture/auth"
-	"github.com/lightninglabs/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/auth"
+	"github.com/studioTeaTwo/aperture/lsat"
 	"gopkg.in/macaroon.v2"
 )
 
