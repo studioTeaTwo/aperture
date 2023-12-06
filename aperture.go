@@ -309,7 +309,7 @@ func (a *Aperture) Start(errChan chan error) error {
 
 	if !a.cfg.Authenticator.Disable {
 		authCfg := a.cfg.Authenticator
-		genInvoiceReq := func(price int64) (*lnrpc.Invoice, error) {
+		genInvoiceReq := func(price int64, memo mint.MemoParam) (*lnrpc.Invoice, error) {
 			return &lnrpc.Invoice{
 				Memo:  "LSAT",
 				Value: price,

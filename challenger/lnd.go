@@ -251,12 +251,12 @@ func (l *LndChallenger) Stop() {
 // request (invoice) and the corresponding payment hash.
 //
 // NOTE: This is part of the mint.Challenger interface.
-func (l *LndChallenger) NewChallenge(price int64) (string, lntypes.Hash,
+func (l *LndChallenger) NewChallenge(price int64, memo MemoParam) (string, lntypes.Hash,
 	error) {
 
 	// Obtain a new invoice from lnd first. We need to know the payment hash
 	// so we can add it as a caveat to the macaroon.
-	invoice, err := l.genInvoiceReq(price)
+	invoice, err := l.genInvoiceReq(price, memo)
 	if err != nil {
 		log.Errorf("Error generating invoice request: %v", err)
 		return "", lntypes.ZeroHash, err

@@ -1,6 +1,10 @@
 package auth
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/studioTeaTwo/aperture/mint"
+)
 
 // MockAuthenticator is a mock implementation of the authenticator.
 type MockAuthenticator struct{}
@@ -32,7 +36,7 @@ func (a MockAuthenticator) Accept(header *http.Header, _ string) bool {
 // FreshChallengeHeader returns a header containing a challenge for the user to
 // complete.
 func (a MockAuthenticator) FreshChallengeHeader(r *http.Request,
-	_ string, _ int64) (http.Header, error) {
+	_ string, _ int64, _ mint.MemoParam) (http.Header, error) {
 
 	header := r.Header
 	header.Set(

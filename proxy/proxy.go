@@ -3,6 +3,7 @@ package proxy
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/mint"
 	"google.golang.org/grpc/codes"
 )
 
@@ -400,8 +402,18 @@ func (p *Proxy) handlePaymentRequired(w http.ResponseWriter, r *http.Request,
 
 	addCorsHeaders(r.Header)
 
+	var m mint.MemoParam
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		log.Errorf("Error decoding request parameters : %v", err)
+		sendDirectResponse(
+			w, r, http.StatusBadRequest,
+			"Invalid parameters",
+		)
+		return
+	}
+
 	header, err := p.authenticator.FreshChallengeHeader(
-		r, serviceName, servicePrice,
+		r, serviceName, servicePrice, m,
 	)
 	if err != nil {
 		log.Errorf("Error creating new challenge header: %v", err)

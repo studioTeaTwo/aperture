@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/studioTeaTwo/aperture/lsat"
 	"github.com/studioTeaTwo/aperture/mint"
-	"github.com/lightningnetwork/lnd/lnrpc"
 )
 
 // LsatAuthenticator is an authenticator that uses the LSAT protocol to
@@ -76,7 +76,7 @@ func (l *LsatAuthenticator) Accept(header *http.Header, serviceName string) bool
 //
 // NOTE: This is part of the Authenticator interface.
 func (l *LsatAuthenticator) FreshChallengeHeader(r *http.Request,
-	serviceName string, servicePrice int64) (http.Header, error) {
+	serviceName string, servicePrice int64, memo mint.MemoParam) (http.Header, error) {
 
 	service := lsat.Service{
 		Name:  serviceName,
@@ -84,7 +84,7 @@ func (l *LsatAuthenticator) FreshChallengeHeader(r *http.Request,
 		Price: servicePrice,
 	}
 	mac, paymentRequest, err := l.minter.MintLSAT(
-		context.Background(), service,
+		context.Background(), memo, service,
 	)
 	if err != nil {
 		log.Errorf("Error minting LSAT: %v", err)

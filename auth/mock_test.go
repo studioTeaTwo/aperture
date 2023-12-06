@@ -17,7 +17,7 @@ type mockMint struct {
 
 var _ auth.Minter = (*mockMint)(nil)
 
-func (m *mockMint) MintLSAT(_ context.Context,
+func (m *mockMint) MintLSAT(_ context.Context, _ mint.MemoParam,
 	services ...lsat.Service) (*macaroon.Macaroon, string, error) {
 
 	return nil, "", nil

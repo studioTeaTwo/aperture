@@ -11,7 +11,7 @@ import (
 
 // InvoiceRequestGenerator is a function type that returns a new request for the
 // lnrpc.AddInvoice call.
-type InvoiceRequestGenerator func(price int64) (*lnrpc.Invoice, error)
+type InvoiceRequestGenerator func(price int64, memo MemoParam) (*lnrpc.Invoice, error)
 
 // InvoiceClient is an interface that only implements part of a full lnd client,
 // namely the part around the invoices we need for the challenger to work.
@@ -36,3 +36,6 @@ type Challenger interface {
 	mint.Challenger
 	auth.InvoiceChecker
 }
+
+// For simple-l402-server
+type MemoParam = mint.MemoParam

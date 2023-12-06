@@ -28,7 +28,7 @@ type Challenger interface {
 	// payment request. The payment hash is also returned as a convenience
 	// to avoid having to decode the payment request in order to retrieve
 	// its payment hash.
-	NewChallenge(price int64) (string, lntypes.Hash, error)
+	NewChallenge(price int64, memo MemoParam) (string, lntypes.Hash, error)
 
 	// Stop shuts down the challenger.
 	Stop()
@@ -100,13 +100,19 @@ type Mint struct {
 	cfg Config
 }
 
+// For simple-l402-server
+type MemoParam struct {
+	Slug        string `json:"slug"`
+	NostrPubkey string `json:"nostrPubkey"`
+}
+
 // New creates a new LSAT mint backed by its given dependencies.
 func New(cfg *Config) *Mint {
 	return &Mint{cfg: *cfg}
 }
 
 // MintLSAT mints a new LSAT for the target services.
-func (m *Mint) MintLSAT(ctx context.Context,
+func (m *Mint) MintLSAT(ctx context.Context, memo MemoParam,
 	services ...lsat.Service) (*macaroon.Macaroon, string, error) {
 
 	// Let the LSAT value as the price of the most expensive of the
@@ -115,7 +121,7 @@ func (m *Mint) MintLSAT(ctx context.Context,
 
 	// We'll start by retrieving a new challenge in the form of a Lightning
 	// payment request to present the requester of the LSAT with.
-	paymentRequest, paymentHash, err := m.cfg.Challenger.NewChallenge(price)
+	paymentRequest, paymentHash, err := m.cfg.Challenger.NewChallenge(price, memo)
 	if err != nil {
 		return nil, "", err
 	}
