@@ -6,12 +6,13 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/mint"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"google.golang.org/grpc"
 )
 
 // InvoiceRequestGenerator is a function type that returns a new request for the
 // lnrpc.AddInvoice call.
-type InvoiceRequestGenerator func(price int64, memo MemoParam) (*lnrpc.Invoice, error)
+type InvoiceRequestGenerator func(price int64, params *nostr.NostrPublishParam) (*lnrpc.Invoice, error)
 
 // InvoiceClient is an interface that only implements part of a full lnd client,
 // namely the part around the invoices we need for the challenger to work.
@@ -36,6 +37,3 @@ type Challenger interface {
 	mint.Challenger
 	auth.InvoiceChecker
 }
-
-// For simple-l402-server
-type MemoParam = mint.MemoParam
