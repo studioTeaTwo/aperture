@@ -11,6 +11,7 @@ import (
 
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
+	"github.com/studioTeaTwo/aperture/nostr"
 )
 
 // LndChallenger is a challenger that uses an lnd backend to create new LSAT
@@ -25,6 +26,9 @@ type LndChallenger struct {
 	invoicesCancel func()
 	invoicesCond   *sync.Cond
 
+	nostrClient nostr.NostrClient
+	nostrParams map[lntypes.Hash]*nostr.NostrPublishParam // be not set untill the invoice is minted or settled
+
 	errChan chan<- error
 
 	quit chan struct{}
@@ -38,7 +42,7 @@ var _ Challenger = (*LndChallenger)(nil)
 // NewLndChallenger creates a new challenger that uses the given connection to
 // an lnd backend to create payment challenges.
 func NewLndChallenger(client InvoiceClient,
-	genInvoiceReq InvoiceRequestGenerator,
+	genInvoiceReq InvoiceRequestGenerator, nclient nostr.NostrClient,
 	ctxFunc func() context.Context,
 	errChan chan<- error) (*LndChallenger, error) {
 
@@ -60,6 +64,8 @@ func NewLndChallenger(client InvoiceClient,
 		invoiceStates: make(map[lntypes.Hash]lnrpc.Invoice_InvoiceState),
 		invoicesMtx:   invoicesMtx,
 		invoicesCond:  sync.NewCond(invoicesMtx),
+		nostrClient:   nclient,
+		nostrParams:   make(map[lntypes.Hash]*nostr.NostrPublishParam),
 		quit:          make(chan struct{}),
 		errChan:       errChan,
 	}
@@ -231,6 +237,17 @@ func (l *LndChallenger) readInvoiceStream(
 			delete(l.invoiceStates, hash)
 		} else {
 			l.invoiceStates[hash] = invoice.State
+
+			// Publish Nostr's event
+			if invoice.State == lnrpc.Invoice_SETTLED {
+				preimage, err := lntypes.MakePreimage(invoice.GetRPreimage())
+				if err != nil {
+					log.Errorf("Error making invoice preimage: %v", err)
+					return
+				}
+				l.nostrParams[hash].Preimage = preimage
+				l.nostrClient.PublishEvent(l.nostrParams[hash])
+			}
 		}
 
 		// Before releasing the lock, notify our conditions that listen
@@ -251,12 +268,24 @@ func (l *LndChallenger) Stop() {
 // request (invoice) and the corresponding payment hash.
 //
 // NOTE: This is part of the mint.Challenger interface.
-func (l *LndChallenger) NewChallenge(price int64, memo MemoParam) (string, lntypes.Hash,
+func (l *LndChallenger) NewChallenge(price int64, params *nostr.NostrPublishParam) (string, lntypes.Hash,
 	error) {
+
+	// userRelayList is optional
+	// preimage isn't yet
+	if params.UserNPubkey == "" {
+		return "", lntypes.ZeroHash, fmt.Errorf("userNPubkey cannot be nil: %s", params.UserNPubkey)
+	}
+	if params.Slug == "" {
+		return "", lntypes.ZeroHash, fmt.Errorf("slug cannot be nil: %s", params.Slug)
+	}
+	if params.Price == 0 {
+		return "", lntypes.ZeroHash, fmt.Errorf("price cannot be nil: %d", params.Price)
+	}
 
 	// Obtain a new invoice from lnd first. We need to know the payment hash
 	// so we can add it as a caveat to the macaroon.
-	invoice, err := l.genInvoiceReq(price, memo)
+	invoice, err := l.genInvoiceReq(price, params)
 	if err != nil {
 		log.Errorf("Error generating invoice request: %v", err)
 		return "", lntypes.ZeroHash, err
@@ -274,6 +303,9 @@ func (l *LndChallenger) NewChallenge(price int64, memo MemoParam) (string, lntyp
 		log.Errorf("Error parsing payment hash: %v", err)
 		return "", lntypes.ZeroHash, err
 	}
+
+	// Save Nostr's params. This will be used when the invoice setteld.
+	l.nostrParams[paymentHash] = params
 
 	return response.PaymentRequest, paymentHash, nil
 }

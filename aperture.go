@@ -32,6 +32,7 @@ import (
 	"github.com/studioTeaTwo/aperture/challenger"
 	"github.com/studioTeaTwo/aperture/lnc"
 	"github.com/studioTeaTwo/aperture/mint"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"github.com/studioTeaTwo/aperture/proxy"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"golang.org/x/crypto/acme/autocert"
@@ -309,7 +310,7 @@ func (a *Aperture) Start(errChan chan error) error {
 
 	if !a.cfg.Authenticator.Disable {
 		authCfg := a.cfg.Authenticator
-		genInvoiceReq := func(price int64, memo mint.MemoParam) (*lnrpc.Invoice, error) {
+		genInvoiceReq := func(price int64, params *nostr.NostrPublishParam) (*lnrpc.Invoice, error) {
 			return &lnrpc.Invoice{
 				Memo:  "LSAT",
 				Value: price,
@@ -336,7 +337,7 @@ func (a *Aperture) Start(errChan chan error) error {
 			}
 
 			a.challenger, err = challenger.NewLNCChallenger(
-				session, lncStore, genInvoiceReq, errChan,
+				session, lncStore, genInvoiceReq, *nostr.MockNostrClient, errChan,
 			)
 			if err != nil {
 				return fmt.Errorf("unable to start lnc "+
@@ -359,7 +360,7 @@ func (a *Aperture) Start(errChan chan error) error {
 			}
 
 			a.challenger, err = challenger.NewLndChallenger(
-				client, genInvoiceReq, context.Background,
+				client, genInvoiceReq, *nostr.MockNostrClient, context.Background,
 				errChan,
 			)
 			if err != nil {

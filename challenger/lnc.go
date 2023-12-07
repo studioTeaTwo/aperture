@@ -7,6 +7,7 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/studioTeaTwo/aperture/lnc"
+	"github.com/studioTeaTwo/aperture/nostr"
 )
 
 // LNCChallenger is a challenger that uses LNC to connect to an lnd backend to
@@ -19,7 +20,7 @@ type LNCChallenger struct {
 // NewLNCChallenger creates a new challenger that uses the given LNC session to
 // connect to an lnd backend to create payment challenges.
 func NewLNCChallenger(session *lnc.Session, lncStore lnc.Store,
-	genInvoiceReq InvoiceRequestGenerator,
+	genInvoiceReq InvoiceRequestGenerator, nclient nostr.NostrClient,
 	errChan chan<- error) (*LNCChallenger, error) {
 
 	nodeConn, err := lnc.NewNodeConn(session, lncStore)
@@ -34,7 +35,7 @@ func NewLNCChallenger(session *lnc.Session, lncStore lnc.Store,
 	}
 
 	lndChallenger, err := NewLndChallenger(
-		client, genInvoiceReq, nodeConn.CtxFunc, errChan,
+		client, genInvoiceReq, nclient, nodeConn.CtxFunc, errChan,
 	)
 	if err != nil {
 		return nil, err
@@ -65,10 +66,10 @@ func (l *LNCChallenger) Stop() {
 // request (invoice) and the corresponding payment hash.
 //
 // NOTE: This is part of the mint.Challenger interface.
-func (l *LNCChallenger) NewChallenge(price int64, memo MemoParam) (string, lntypes.Hash,
+func (l *LNCChallenger) NewChallenge(price int64, params *nostr.NostrPublishParam) (string, lntypes.Hash,
 	error) {
 
-	return l.lndChallenger.NewChallenge(price, memo)
+	return l.lndChallenger.NewChallenge(price, params)
 }
 
 // VerifyInvoiceStatus checks that an invoice identified by a payment
