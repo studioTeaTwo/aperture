@@ -14,7 +14,7 @@ import (
 
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/lsat"
-	"github.com/studioTeaTwo/aperture/mint"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"google.golang.org/grpc/codes"
 )
 
@@ -402,8 +402,8 @@ func (p *Proxy) handlePaymentRequired(w http.ResponseWriter, r *http.Request,
 
 	addCorsHeaders(r.Header)
 
-	var m mint.MemoParam
-	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+	var n nostr.NostrPublishParam
+	if err := json.NewDecoder(r.Body).Decode(&n); err != nil {
 		log.Errorf("Error decoding request parameters : %v", err)
 		sendDirectResponse(
 			w, r, http.StatusBadRequest,
@@ -413,7 +413,7 @@ func (p *Proxy) handlePaymentRequired(w http.ResponseWriter, r *http.Request,
 	}
 
 	header, err := p.authenticator.FreshChallengeHeader(
-		r, serviceName, servicePrice, m,
+		r, serviceName, servicePrice, &n,
 	)
 	if err != nil {
 		log.Errorf("Error creating new challenge header: %v", err)

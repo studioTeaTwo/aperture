@@ -9,6 +9,7 @@ import (
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/studioTeaTwo/aperture/lsat"
 	"github.com/studioTeaTwo/aperture/mint"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"gopkg.in/macaroon.v2"
 )
 
@@ -27,14 +28,14 @@ type Authenticator interface {
 
 	// FreshChallengeHeader returns a header containing a challenge for the
 	// user to complete.
-	FreshChallengeHeader(*http.Request, string, int64, mint.MemoParam) (http.Header, error)
+	FreshChallengeHeader(*http.Request, string, int64, *nostr.NostrPublishParam) (http.Header, error)
 }
 
 // Minter is an entity that is able to mint and verify LSATs for a set of
 // services.
 type Minter interface {
 	// MintLSAT mints a new LSAT for the target services.
-	MintLSAT(context.Context, mint.MemoParam, ...lsat.Service) (*macaroon.Macaroon, string, error)
+	MintLSAT(context.Context, *nostr.NostrPublishParam, ...lsat.Service) (*macaroon.Macaroon, string, error)
 
 	// VerifyLSAT attempts to verify an LSAT with the given parameters.
 	VerifyLSAT(context.Context, *mint.VerificationParams) error
