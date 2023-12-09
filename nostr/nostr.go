@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip04"
@@ -31,7 +33,8 @@ type NostrPublishParam struct {
 	UserRelayList []string         `json:"relayList,omitempty"`
 	Slug          string           `json:"slug"`               // the identifier of blog artcle
 	Price         int64            `json:"price"`              // invoice's price, which may be optional using BOLT12 or LNURL in the future
-	Preimage      lntypes.Preimage `json:"preimage,omitempty"` // invoice's preimage, which will basically be filled in when the invoice settled
+	Preimage      lntypes.Preimage `json:"preimage,omitempty"` // invoice's preimage, which will basically be filled in when the invoice settle
+	Invoice       *lnrpc.Invoice
 }
 
 func NewNostrClient(serviceNSeckey string, servicename string, serviceRelayList []string) (*NostrClient, error) {
@@ -62,9 +65,24 @@ func NewNostrClient(serviceNSeckey string, servicename string, serviceRelayList 
 }
 
 func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
+	preimage, err := lntypes.MakePreimage(p.Invoice.GetRPreimage())
+	if err != nil {
+		return fmt.Errorf("error making invoice preimage: %w", err)
+	}
+	paymentHash, err := lntypes.MakeHash(p.Invoice.GetRHash())
+	if err != nil {
+		return fmt.Errorf("error making invoice payment hash: %w", err)
+	}
+
 	// encrypt the preimage
 	// note: message is expected to be the user's receipt
-	message := n.servicename + " slug=" + p.Slug + " price=" + strconv.FormatInt(p.Price, 10) + " preimage=" + p.Preimage.String()
+	message := n.servicename +
+		" article=" + p.Slug +
+		" settleDate=" + time.Unix(p.Invoice.GetSettleDate(), 0).Format("2006-01-02 15:04:05") +
+		" price=" + strconv.FormatInt(p.Price, 10) +
+		" paidAmount=" + strconv.FormatInt(p.Invoice.GetAmtPaidMsat(), 10) +
+		" preimage=" + preimage.String() +
+		" paymentHash=" + paymentHash.String()
 	sharedsecret, err := nip04.ComputeSharedSecret(p.UserNPubkey, n.seckey)
 	if err != nil {
 		return fmt.Errorf("failed to compute shared secret: %w", err)

@@ -240,12 +240,7 @@ func (l *LndChallenger) readInvoiceStream(
 
 			// Publish Nostr's event
 			if invoice.State == lnrpc.Invoice_SETTLED {
-				preimage, err := lntypes.MakePreimage(invoice.GetRPreimage())
-				if err != nil {
-					log.Errorf("Error making invoice preimage: %v", err)
-					return
-				}
-				l.nostrParams[hash].Preimage = preimage
+				l.nostrParams[hash].Invoice = invoice
 				l.nostrClient.PublishEvent(l.nostrParams[hash])
 			}
 		}
