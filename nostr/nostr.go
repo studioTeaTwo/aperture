@@ -64,6 +64,11 @@ func NewNostrClient(serviceNSeckey string, servicename string, serviceRelayList 
 }
 
 func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
+	_, v, err := nip19.Decode(p.UserNPubkey)
+	if err != nil {
+		return fmt.Errorf("failed to decode user's nPubKey: %w", err)
+	}
+	userPubkey := v.(string)
 	preimage, err := lntypes.MakePreimage(p.Invoice.GetRPreimage())
 	if err != nil {
 		return fmt.Errorf("error making invoice preimage: %w", err)
@@ -82,7 +87,7 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 		" paidAmount=" + strconv.FormatInt(p.Invoice.GetAmtPaidMsat(), 10) +
 		" preimage=" + preimage.String() +
 		" paymentHash=" + paymentHash.String()
-	sharedsecret, err := nip04.ComputeSharedSecret(p.UserNPubkey, n.seckey)
+	sharedsecret, err := nip04.ComputeSharedSecret(userPubkey, n.seckey)
 	if err != nil {
 		return fmt.Errorf("failed to compute shared secret: %w", err)
 	}
@@ -93,14 +98,15 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 
 	// create event
 	ev := nostr.Event{
-		PubKey:    n.nPubkey,
+		PubKey:    n.pubkey,
 		CreatedAt: nostr.Now(),
 		Kind:      nostr.KindEncryptedDirectMessage,
 		Tags:      nil,
 		Content:   msg,
 	}
-	ev.Tags.AppendUnique(nostr.Tag{"p", p.UserNPubkey})
-	ev.Tags.AppendUnique(nostr.Tag{"l402", n.servicename})
+	ev.Tags.AppendUnique(nostr.Tag{"p", userPubkey})
+	ev.Tags.AppendUnique(nostr.Tag{"L", "#l402"})
+	ev.Tags.AppendUnique(nostr.Tag{"l", n.servicename, "#l402"})
 
 	// calling Sign sets the event ID field and the event Sig field
 	if err := ev.Sign(n.seckey); err != nil {
