@@ -29,11 +29,10 @@ type NostrClient struct {
 }
 
 type NostrPublishParam struct {
-	UserNPubkey   string           `json:"nPubkey"`
-	UserRelayList []string         `json:"relayList,omitempty"`
-	Slug          string           `json:"slug"`               // the identifier of blog artcle
-	Price         int64            `json:"price"`              // invoice's price, which may be optional using BOLT12 or LNURL in the future
-	Preimage      lntypes.Preimage `json:"preimage,omitempty"` // invoice's preimage, which will basically be filled in when the invoice settle
+	UserNPubkey   string   `json:"nPubkey"`
+	UserRelayList []string `json:"relayList,omitempty"`
+	Slug          string   `json:"slug"`  // the identifier of blog artcle
+	Price         int64    `json:"price"` // invoice's price, which may be optional using BOLT12 or LNURL in the future
 	Invoice       *lnrpc.Invoice
 }
 
