@@ -104,9 +104,15 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 		Tags:      nil,
 		Content:   msg,
 	}
-	ev.Tags.AppendUnique(nostr.Tag{"p", userPubkey})
-	ev.Tags.AppendUnique(nostr.Tag{"L", "#l402"})
-	ev.Tags.AppendUnique(nostr.Tag{"l", n.servicename, "#l402"})
+	ev.Tags = nostr.Tags{}
+	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"p", userPubkey})
+	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"L", "#l402"})
+	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"l", n.servicename, "#l402"})
+	relays := nostr.Tag{"relays"}
+	for _, v := range n.relayList {
+		relays = append(relays, v)
+	}
+	ev.Tags = ev.Tags.AppendUnique(relays)
 
 	// calling Sign sets the event ID field and the event Sig field
 	if err := ev.Sign(n.seckey); err != nil {
@@ -128,7 +134,7 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 			continue
 		}
 
-		fmt.Printf("published to %s\n", url)
+		fmt.Printf("published to %s %+v", url, ev)
 	}
 	return nil
 }
