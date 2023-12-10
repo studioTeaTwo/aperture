@@ -239,7 +239,7 @@ func (l *LndChallenger) readInvoiceStream(
 			l.invoiceStates[hash] = invoice.State
 
 			// Publish Nostr's event
-			if invoice.State == lnrpc.Invoice_SETTLED {
+			if (invoice.State == lnrpc.Invoice_SETTLED) && (l.nostrParams[hash] != nil) {
 				l.nostrParams[hash].Invoice = invoice
 				l.nostrClient.PublishEvent(l.nostrParams[hash])
 			}
