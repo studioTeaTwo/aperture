@@ -119,6 +119,8 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 		return fmt.Errorf("failed to sign event: %w", err)
 	}
 
+	log.Infof("prepared new Nostr's event: %+v", ev)
+
 	// publish the event to two relays
 	ctx := context.Background()
 	// TODO: also publish the relay which the user subscribes
@@ -134,7 +136,7 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 			continue
 		}
 
-		fmt.Printf("published to %s %+v", url, ev)
+		log.Infof("published to %s event:%s", url, ev.ID)
 	}
 	return nil
 }

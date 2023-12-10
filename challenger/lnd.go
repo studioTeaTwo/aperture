@@ -236,6 +236,7 @@ func (l *LndChallenger) readInvoiceStream(
 			// Don't keep the state of canceled or expired invoices.
 			delete(l.invoiceStates, hash)
 		} else {
+			log.Infof("received invoice's settlement: %s", hash)
 			l.invoiceStates[hash] = invoice.State
 
 			// Publish Nostr's event
