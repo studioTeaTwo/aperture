@@ -82,8 +82,8 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 	// note: message is expected to be the user's receipt
 	message := n.servicename +
 		" article=" + p.Slug +
-		" settleDate=" + time.Unix(p.Invoice.GetSettleDate(), 0).Format("2006-01-02 15:04:05") +
-		" price=" + strconv.FormatInt(p.Price, 10) +
+		" settleDate=" + time.Unix(p.Invoice.GetSettleDate(), 0).Format("2006-01-02T15:04:05") +
+		" price=" + strconv.FormatInt(p.Price*1000, 10) +
 		" paidAmount=" + strconv.FormatInt(p.Invoice.GetAmtPaidMsat(), 10) +
 		" preimage=" + preimage.String() +
 		" paymentHash=" + paymentHash.String()
