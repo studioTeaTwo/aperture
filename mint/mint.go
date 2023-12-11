@@ -33,6 +33,9 @@ type Challenger interface {
 
 	// Stop shuts down the challenger.
 	Stop()
+
+	// Set macaroon to NostrParams
+	SetMacaroon(lntypes.Hash, *macaroon.Macaroon)
 }
 
 // SecretStore is the store responsible for storing LSAT secrets. These secrets
@@ -160,6 +163,8 @@ func (m *Mint) MintLSAT(ctx context.Context, params *nostr.NostrPublishParam,
 		_ = m.cfg.Secrets.RevokeSecret(ctx, idHash)
 		return nil, "", err
 	}
+
+	m.cfg.Challenger.SetMacaroon(paymentHash, mac)
 
 	return mac, paymentRequest, nil
 }

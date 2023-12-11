@@ -12,6 +12,7 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/studioTeaTwo/aperture/nostr"
+	"gopkg.in/macaroon.v2"
 )
 
 // LndChallenger is a challenger that uses an lnd backend to create new LSAT
@@ -405,4 +406,9 @@ func invoiceIrrelevant(invoice *lnrpc.Invoice) bool {
 		invoice.State == lnrpc.Invoice_ACCEPTED
 
 	return expired && notSettled
+}
+
+// Save to use when publishing to Nostr network
+func (l *LndChallenger) SetMacaroon(paymentHash lntypes.Hash, macaroon *macaroon.Macaroon) {
+	l.nostrParams[paymentHash].Macaroon = *macaroon
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/studioTeaTwo/aperture/lnc"
 	"github.com/studioTeaTwo/aperture/nostr"
+	"gopkg.in/macaroon.v2"
 )
 
 // LNCChallenger is a challenger that uses LNC to connect to an lnd backend to
@@ -82,4 +83,8 @@ func (l *LNCChallenger) VerifyInvoiceStatus(hash lntypes.Hash,
 	state lnrpc.Invoice_InvoiceState, timeout time.Duration) error {
 
 	return l.lndChallenger.VerifyInvoiceStatus(hash, state, timeout)
+}
+
+func (l *LNCChallenger) SetMacaroon(paymentHash lntypes.Hash, macaroon *macaroon.Macaroon) {
+	l.lndChallenger.SetMacaroon(paymentHash, macaroon)
 }

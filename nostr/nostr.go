@@ -2,6 +2,7 @@ package nostr
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip04"
 	"github.com/nbd-wtf/go-nostr/nip19"
+	"gopkg.in/macaroon.v2"
 )
 
 const ()
@@ -34,6 +36,7 @@ type NostrPublishParam struct {
 	Slug          string   `json:"slug"`  // the identifier of blog artcle
 	Price         int64    `json:"price"` // invoice's price, which may be optional using BOLT12 or LNURL in the future
 	Invoice       *lnrpc.Invoice
+	Macaroon      macaroon.Macaroon
 }
 
 func NewNostrClient(serviceNSeckey string, servicename string, serviceRelayList []string) (*NostrClient, error) {
@@ -77,6 +80,7 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 	if err != nil {
 		return fmt.Errorf("error making invoice payment hash: %w", err)
 	}
+	relayList := append(n.relayList, p.UserRelayList...)
 
 	// encrypt the preimage
 	// note: message is expected to be the user's receipt
@@ -96,6 +100,17 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 		return fmt.Errorf("failed to encrypt preimage: %w", err)
 	}
 
+	// encrypt the macaroon and will decrypted by user's secret key
+	macBytes, err := p.Macaroon.MarshalBinary()
+	if err != nil {
+		log.Errorf("Error serializing LSAT: %v", err)
+	}
+	macaroon := base64.StdEncoding.EncodeToString(macBytes)
+	token, err := nip04.Encrypt(macaroon, sharedsecret)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt macaroon: %w", err)
+	}
+
 	// create event
 	ev := nostr.Event{
 		PubKey:    n.pubkey,
@@ -108,8 +123,10 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"p", userPubkey})
 	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"L", "#l402"})
 	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"l", n.servicename, "#l402"})
+	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"L", "l402token"})
+	ev.Tags = ev.Tags.AppendUnique(nostr.Tag{"l", token, "l402token"})
 	relays := nostr.Tag{"relays"}
-	for _, v := range n.relayList {
+	for _, v := range relayList {
 		relays = append(relays, v)
 	}
 	ev.Tags = ev.Tags.AppendUnique(relays)
@@ -124,7 +141,7 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 	// publish the event to two relays
 	ctx := context.Background()
 	// TODO: also publish the relay which the user subscribes
-	for _, url := range n.relayList {
+	for _, url := range relayList {
 		relay, err := nostr.RelayConnect(ctx, url)
 		if err != nil {
 			fmt.Println(err)
