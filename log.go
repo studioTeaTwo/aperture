@@ -8,6 +8,7 @@ import (
 	"github.com/lightningnetwork/lnd/signal"
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"github.com/studioTeaTwo/aperture/proxy"
 )
 
@@ -30,6 +31,7 @@ func SetupLoggers(root *build.RotatingLogWriter, intercept signal.Interceptor) {
 	lnd.AddSubLogger(root, lsat.Subsystem, intercept, lsat.UseLogger)
 	lnd.AddSubLogger(root, proxy.Subsystem, intercept, proxy.UseLogger)
 	lnd.AddSubLogger(root, "LNDC", intercept, lndclient.UseLogger)
+	lnd.AddSubLogger(root, nostr.Subsystem, intercept, nostr.UseLogger)
 }
 
 // genSubLogger creates a logger for a subsystem. We provide an instance of
