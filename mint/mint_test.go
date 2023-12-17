@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"gopkg.in/macaroon.v2"
 )
 
@@ -33,7 +34,7 @@ func TestBasicLSAT(t *testing.T) {
 	})
 
 	// Mint a basic LSAT which is only able to access the given service.
-	macaroon, _, err := mint.MintLSAT(ctx, testService)
+	macaroon, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams, testService)
 	if err != nil {
 		t.Fatalf("unable to mint LSAT: %v", err)
 	}
@@ -70,7 +71,7 @@ func TestAdminLSAT(t *testing.T) {
 	})
 
 	// Mint an admin LSAT by not including any services.
-	macaroon, _, err := mint.MintLSAT(ctx)
+	macaroon, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams)
 	if err != nil {
 		t.Fatalf("unable to mint LSAT: %v", err)
 	}
@@ -100,7 +101,7 @@ func TestRevokedLSAT(t *testing.T) {
 	})
 
 	// Mint an LSAT and verify it.
-	lsat, _, err := mint.MintLSAT(ctx)
+	lsat, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams)
 	if err != nil {
 		t.Fatalf("unable to mint LSAT: %v", err)
 	}
@@ -137,7 +138,7 @@ func TestTamperedLSAT(t *testing.T) {
 	})
 
 	// Mint a new LSAT and verify it is valid.
-	mac, _, err := mint.MintLSAT(ctx, testService)
+	mac, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams, testService)
 	if err != nil {
 		t.Fatalf("unable to mint LSAT: %v", err)
 	}
@@ -189,7 +190,7 @@ func TestDemotedServicesLSAT(t *testing.T) {
 
 	// Mint an LSAT that is able to access two services, one of which will
 	// be denied later on.
-	mac, _, err := mint.MintLSAT(ctx, testService, unauthorizedService)
+	mac, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams, testService, unauthorizedService)
 	if err != nil {
 		t.Fatalf("unable to mint LSAT: %v", err)
 	}
@@ -249,7 +250,7 @@ func TestExpiredServicesLSAT(t *testing.T) {
 	})
 
 	// Mint a new lsat for accessing a test service.
-	mac, _, err := mint.MintLSAT(ctx, testService)
+	mac, _, err := mint.MintLSAT(ctx, &nostr.MockNostrParams, testService)
 	require.NoError(t, err)
 
 	authorizedParams := VerificationParams{

@@ -10,6 +10,7 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/stretchr/testify/require"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"google.golang.org/grpc"
 )
 
@@ -94,7 +95,7 @@ func newChallenger() (*LndChallenger, *mockInvoiceClient, chan error) {
 		errChan:    make(chan error, 1),
 		quit:       make(chan struct{}),
 	}
-	genInvoiceReq := func(price int64) (*lnrpc.Invoice, error) {
+	genInvoiceReq := func(price int64, params *nostr.NostrPublishParam) (*lnrpc.Invoice, error) {
 		return newInvoice(lntypes.ZeroHash, 99, lnrpc.Invoice_OPEN),
 			nil
 	}
@@ -105,9 +106,11 @@ func newChallenger() (*LndChallenger, *mockInvoiceClient, chan error) {
 		clientCtx:     context.Background,
 		genInvoiceReq: genInvoiceReq,
 		invoiceStates: make(map[lntypes.Hash]lnrpc.Invoice_InvoiceState),
-		quit:          make(chan struct{}),
 		invoicesMtx:   invoicesMtx,
 		invoicesCond:  sync.NewCond(invoicesMtx),
+		nostrClient:   *nostr.MockNostrClient,
+		nostrParams:   make(map[lntypes.Hash]*nostr.NostrPublishParam),
+		quit:          make(chan struct{}),
 		errChan:       mainErrChan,
 	}, mockClient, mainErrChan
 }
@@ -131,7 +134,7 @@ func TestLndChallenger(t *testing.T) {
 	// First of all, test that the NewLndChallenger doesn't allow a nil
 	// invoice generator function.
 	errChan := make(chan error)
-	_, err := NewLndChallenger(nil, nil, nil, errChan)
+	_, err := NewLndChallenger(nil, nil, nostr.NostrClient{}, nil, errChan)
 	require.Error(t, err)
 
 	// Now mock the lnd backend and create a challenger instance that we can
@@ -139,7 +142,7 @@ func TestLndChallenger(t *testing.T) {
 	c, invoiceMock, mainErrChan := newChallenger()
 
 	// Creating a new challenge should add an invoice to the lnd backend.
-	req, hash, err := c.NewChallenge(1337)
+	req, hash, err := c.NewChallenge(1337, &nostr.MockNostrParams)
 	require.NoError(t, err)
 	require.Equal(t, "foo", req)
 	require.Equal(t, lntypes.ZeroHash, hash)

@@ -1,5 +1,5 @@
-PKG := github.com/lightninglabs/aperture
-ESCPKG := github.com\/lightninglabs\/aperture
+PKG := github.com/studioTeaTwo/aperture
+ESCPKG := github.com\/studioTeaTwo\/aperture
 TOOLS_DIR := tools
 
 GOVERALLS_PKG := github.com/mattn/goveralls

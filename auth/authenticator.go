@@ -96,7 +96,7 @@ func (l *LsatAuthenticator) FreshChallengeHeader(r *http.Request,
 		log.Errorf("Error serializing LSAT: %v", err)
 	}
 
-	str := fmt.Sprintf("LSAT macaroon=\"%s\", invoice=\"%s\"",
+	str := fmt.Sprintf("L402 macaroon=\"%s\", invoice=\"%s\"",
 		base64.StdEncoding.EncodeToString(macBytes), paymentRequest)
 	header := r.Header
 	header.Set("WWW-Authenticate", str)

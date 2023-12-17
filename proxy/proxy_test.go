@@ -1,6 +1,7 @@
 package proxy_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -19,6 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"github.com/studioTeaTwo/aperture/proxy"
 	proxytest "github.com/studioTeaTwo/aperture/proxy/testdata"
 	"google.golang.org/grpc"
@@ -45,6 +47,11 @@ const (
 
 var (
 	errBackend = fmt.Errorf("this is the error you wanted")
+	jsonData   = []byte(`{
+		"nPubkey": "npub1xz57kk3gvd4ctergszt6pdh4jku48sakvna3h82khtcnl8yvxx3qjxvlnv",
+		"slug": "001",
+		"price": 10
+	}`)
 )
 
 type testCase struct {
@@ -148,13 +155,13 @@ func runHTTPTest(t *testing.T, tc *testCase) {
 	// Authorization header set.
 	client := &http.Client{}
 	url := fmt.Sprintf("http://%s/http/test", testProxyAddr)
-	resp, err := client.Get(url)
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	require.NoError(t, err)
 
 	require.Equal(t, "402 Payment Required", resp.Status)
 
 	authHeader := resp.Header.Get("Www-Authenticate")
-	require.Contains(t, authHeader, "LSAT")
+	require.Contains(t, authHeader, "L402")
 	_ = resp.Body.Close()
 
 	// Make sure that if we query an URL that is on the whitelist, we don't
@@ -315,7 +322,7 @@ func runGRPCTest(t *testing.T, tc *testCase) {
 	// auth response.
 	expectedHeaderContent, _ := mockAuth.FreshChallengeHeader(&http.Request{
 		Header: map[string][]string{},
-	}, "", 0)
+	}, "", 0, &nostr.MockNostrParams)
 	capturedHeader := captureMetadata.Get("WWW-Authenticate")
 	require.Len(t, capturedHeader, 1)
 	require.Equal(

@@ -7,6 +7,8 @@ import (
 
 	"github.com/lightningnetwork/lnd/lntypes"
 	"github.com/studioTeaTwo/aperture/lsat"
+	"github.com/studioTeaTwo/aperture/nostr"
+	"gopkg.in/macaroon.v2"
 )
 
 var (
@@ -34,10 +36,14 @@ func (d *mockChallenger) Stop() {
 	// Nothing to do here.
 }
 
-func (d *mockChallenger) NewChallenge(price int64, memo MemoParam) (string, lntypes.Hash,
+func (d *mockChallenger) NewChallenge(price int64, params *nostr.NostrPublishParam) (string, lntypes.Hash,
 	error) {
 
 	return testPayReq, testHash, nil
+}
+
+func (d *mockChallenger) SetMacaroon(lntypes.Hash, *macaroon.Macaroon) {
+	// Nothing to do here.
 }
 
 type mockSecretStore struct {

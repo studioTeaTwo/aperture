@@ -9,6 +9,7 @@ import (
 	"github.com/studioTeaTwo/aperture/auth"
 	"github.com/studioTeaTwo/aperture/lsat"
 	"github.com/studioTeaTwo/aperture/mint"
+	"github.com/studioTeaTwo/aperture/nostr"
 	"gopkg.in/macaroon.v2"
 )
 
@@ -17,7 +18,7 @@ type mockMint struct {
 
 var _ auth.Minter = (*mockMint)(nil)
 
-func (m *mockMint) MintLSAT(_ context.Context, _ mint.MemoParam,
+func (m *mockMint) MintLSAT(_ context.Context, _ *nostr.NostrPublishParam,
 	services ...lsat.Service) (*macaroon.Macaroon, string, error) {
 
 	return nil, "", nil
