@@ -140,7 +140,6 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 
 	// publish the event to two relays
 	ctx := context.Background()
-	// TODO: also publish the relay which the user subscribes
 	for _, url := range relayList {
 		relay, err := nostr.RelayConnect(ctx, url)
 		if err != nil {
@@ -154,6 +153,12 @@ func (n *NostrClient) PublishEvent(p *NostrPublishParam) error {
 		}
 
 		log.Infof("published to %s event:%s", url, ev.ID)
+
+		err = relay.Close()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 	}
 	return nil
 }
